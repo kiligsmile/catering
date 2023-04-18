@@ -47,4 +47,4 @@ mybatis-plus:
       id-type: ASSIGN_ID
 reggie:
   path: /Users/Kilig/idea-workspace/reggie/reggie_take_out/src/main/resources/image/
-#  path: /Users/Kilig/Desktop/image/
+#  path: /home/kilig/image/
