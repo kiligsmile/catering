@@ -26,7 +26,6 @@ public class EmployeeController {
     public R<Employee> login(HttpServletRequest request, @RequestBody Employee employee){
         String password= employee.getPassword();
         password= DigestUtils.md5DigestAsHex(password.getBytes());
-
         LambdaQueryWrapper<Employee> queryWrapper=new LambdaQueryWrapper<>();
         queryWrapper.eq(Employee::getUsername,employee.getUsername());
         Employee emp=employeeService.getOne(queryWrapper);

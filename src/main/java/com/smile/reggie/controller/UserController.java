@@ -46,13 +46,22 @@ public class UserController {
         String code = String.valueOf(new Random().nextInt(899999) + 100000);
         System.out.println("验证码为："+code);
         if(StringUtils.isNotEmpty(phone)){
-            SMSUtils.sendMessage(phone,code);
-//            将生成的验证码保存在session中
-//            session.setAttribute(phone,code);
-
-//            将生成的验证码保存在Redis中，并且设置有效期为5分钟
-            redisTemplate.opsForValue().set(phone,code, 5,TimeUnit.MINUTES);
-
+            // 获取上次发送短信的时间戳
+            Long lastTimestamp = (Long) session.getAttribute("lastSmsTimestamp");
+            // 当前时间戳
+            long currentTimestamp = System.currentTimeMillis();
+            // 如果上次发送时间存在且距离当前时间未超过 intervalSeconds 设置的秒数，则不允许发送
+            if (lastTimestamp != null && (currentTimestamp - lastTimestamp) / 1000 < 60) {
+                return R.error("请求频繁，请稍后重试！");
+            } else {
+                // 更新上次发送短信的时间戳
+                session.setAttribute("lastSmsTimestamp", currentTimestamp);
+                SMSUtils.sendMessage(phone,code);
+    //            将生成的验证码保存在session中
+    //            session.setAttribute(phone,code);
+    //            将生成的验证码保存在Redis中，并且设置有效期为5分钟
+                redisTemplate.opsForValue().set(phone,code, 5,TimeUnit.MINUTES);
+            }
             return  R.success("手机验证码短信发送成功");
         }
         return R.error("短信发送失败");
@@ -63,8 +72,9 @@ public class UserController {
         log.info(map.toString());
         String phone= map.get("phone").toString();
         String code = map.get("code").toString();
-//        从session中取验证码
+//         从session中取验证码
 //        Object codeInSession =session.getAttribute(phone);
+
 
 //        从Redis中取验证码
         Object codeInSession=  redisTemplate.opsForValue().get(phone);
